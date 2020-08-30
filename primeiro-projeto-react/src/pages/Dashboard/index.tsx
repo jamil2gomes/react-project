@@ -1,6 +1,6 @@
 import React, {useState, FormEvent} from 'react';
 import {FiChevronRight} from 'react-icons/fi';
-import {Titulo, Form, Repositorios} from './styles';
+import {Titulo, Form, Repositorios, Error} from './styles';
 import api from '../../services/api';
 
 import icon from '../../assets/icon.svg';
@@ -16,18 +16,29 @@ interface Repository{
 
 const Dashboard:React.FC = () => {
 
-    const [newRepo, setNewRepo] = useState('');
+    const [newRepoInput, setnewRepoInput] = useState('');
+    const [erros, setErros] = useState('');
     const [repositorios, setRepositorios] = useState<Repository[]>([]);
 
     async function handlerAddRepositorio(event:FormEvent<HTMLFormElement>):Promise<void>{
         event.preventDefault();
 
-        const response = await api.get<Repository>(`/repos/${newRepo}`);
+        if(!newRepoInput){
+            setErros("Campo vazio! Digite no formato nome-usuario/nome-repositório");
+            return;
+        }
 
-        const repositorio = response.data;
+        try{
+            const response = await api.get<Repository>(`/repos/${newRepoInput}`);
 
-        setRepositorios([...repositorios, repositorio]);
-        setNewRepo('');
+            const repositorio = response.data;
+
+            setRepositorios([...repositorios, repositorio]);
+            setnewRepoInput('');
+            setErros('');
+        }catch(err){
+            setErros("Erro ao fazer a busca!");
+        }
     }
 
     return (
@@ -36,14 +47,18 @@ const Dashboard:React.FC = () => {
 
          <Titulo>Explore repositórios no Github</Titulo>
 
-         <Form onSubmit={handlerAddRepositorio}>
+         <Form hasError={!!erros}
+         onSubmit={handlerAddRepositorio}
+         >
              <input
-             value = {newRepo}
-             onChange ={e => setNewRepo(e.target.value)}
+             value = {newRepoInput}
+             onChange ={e => setnewRepoInput(e.target.value)}
              placeholder = "Digite aqui o nome do repositório"
              />
              <button type="submit">Pesquisar</button>
          </Form>
+
+        {erros && <Error>{erros}</Error>}
 
          <Repositorios>
              {
