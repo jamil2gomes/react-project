@@ -31,7 +31,7 @@ const Dashboard:React.FC = () => {
     useEffect(() =>{
         localStorage.setItem('@GithubExplorer:repositorios', JSON.stringify(repositorios));
     }
-    ,[repositorios])
+    ,[repositorios]);
 
     async function handlerAddRepositorio(event:FormEvent<HTMLFormElement>):Promise<void>{
         event.preventDefault();
